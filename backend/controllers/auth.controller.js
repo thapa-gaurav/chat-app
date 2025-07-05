@@ -5,17 +5,22 @@ import bcrypt from "bcryptjs";
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
   try {
+    if (!fullName || !email) {
+      return res
+        .status(400)
+        .json({ message: "Fill the name and email field." });
+    }
     if (password.length < 6) {
       return res
         .status(400)
         .json({ message: "Password must be atleast 6 characters long" });
     }
-    const user = await User.findOne(email);
+    const user = await User.findOne({ email: email });
     if (user) {
       return res.status(400).json({ message: "Email already exist." });
     }
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
       fullName,
@@ -37,7 +42,7 @@ export const signup = async (req, res) => {
     }
   } catch (error) {
     console.log("Error in signup " + error);
-    res.status(500).json({ message: "Internal Server Errore" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
