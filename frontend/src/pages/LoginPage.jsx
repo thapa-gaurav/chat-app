@@ -1,9 +1,9 @@
-import React from "react";
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { MessageSquare, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
-import { Link } from "lucide-react";
 import AuthImagePattern from "../components/AuthImagePattern";
+import { Link } from "react-router-dom";
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,14 +11,18 @@ const LoginPage = () => {
     password: "",
   });
   const { login, isLoggingIn } = useAuthStore();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     login(formData);
   };
+
   return (
     <div className="h-screen grid lg:grid-cols-2">
+      {/* Left Side - Form */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
+          {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2 group">
               <div
@@ -122,5 +126,4 @@ const LoginPage = () => {
     </div>
   );
 };
-
 export default LoginPage;

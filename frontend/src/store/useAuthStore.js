@@ -26,7 +26,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Registration successfully.");
     } catch (error) {
-      toast.error(error);
+      toast.error(error.response?.data?.message || error.message);
     } finally {
       set({ isSigningUp: false });
     }
@@ -38,7 +38,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Logged in successfully.");
     } catch (error) {
-      toast.error(error);
+      toast.error(error.response?.data?.message || error.message);
     } finally {
       set({ isLogginIn: false });
     }
@@ -49,7 +49,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: null });
       toast.success("Logged out successfully.");
     } catch (error) {
-      toast.error(error);
+      toast.error(error.response?.data?.message || error.message);
     }
   },
 }));
