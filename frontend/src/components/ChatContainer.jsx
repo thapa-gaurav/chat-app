@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useEffect } from "react";
 import { useChatStore } from "../store/usechatStore";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
@@ -13,6 +14,7 @@ const ChatContainer = () => {
   useEffect(() => {
     getMessages(selectedUser._id);
   }, [selectedUser._id, getMessages]);
+  console.log(messages);
   if (isMessagesLoading)
     return (
       <div>
@@ -25,13 +27,12 @@ const ChatContainer = () => {
   return (
     <div className="flex-1 flex flex-col overflow-auto ">
       <ChatHeader />
-
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
             key={message._id}
             className={`chat ${
-              message.senderId === authUser._id ? "Chat-end" : "chat-start"
+              message.senderId === authUser._id ? "chat-end" : "chat-start"
             }`}
           >
             <div className="chat-image avatar">
@@ -53,10 +54,10 @@ const ChatContainer = () => {
               </time>
             </div>
 
-            <div className="chat-bubble flex flex-column">
+            <div className="chat-bubble flex flex-col">
               {message.image && (
                 <img
-                  src="message.image"
+                  src={message.image}
                   alt="Attachment"
                   className="sm:max-w-[200px] rounded-md mb-2"
                 />
@@ -66,7 +67,6 @@ const ChatContainer = () => {
           </div>
         ))}
       </div>
-
       <MessageInput />
     </div>
   );
