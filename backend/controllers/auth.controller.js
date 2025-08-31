@@ -139,8 +139,8 @@ export const changePassword = async (req, res) => {
         message: "Current password is incorrect",
       });
     }
-
-    user.password = newPassword;
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     res.status(200).json({

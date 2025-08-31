@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 
 const ChangePassword = () => {
   const { isChangingPassword, changePassword } = useAuthStore();
@@ -9,6 +10,8 @@ const ChangePassword = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -52,7 +55,7 @@ const ChangePassword = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="text-sm text-zinc-400">Current Password</label>
               <input
                 type="password"
@@ -63,9 +66,39 @@ const ChangePassword = () => {
                 className="w-full px-4 py-2.5 bg-base-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter current password"
               />
+            </div> */}
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-base-content/40" />
+                </div>
+                <input
+                  name="currentPassword"
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="text-sm text-zinc-400">New Password</label>
               <input
                 type="password"
@@ -77,9 +110,39 @@ const ChangePassword = () => {
                 className="w-full px-4 py-2.5 bg-base-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter new password"
               />
+            </div> */}
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">New Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-base-content/40" />
+                </div>
+                <input
+                  name="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            {/* <div className="space-y-1.5">
               <label className="text-sm text-zinc-400">
                 Confirm New Password
               </label>
@@ -92,6 +155,36 @@ const ChangePassword = () => {
                 className="w-full px-4 py-2.5 bg-base-200 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Confirm new password"
               />
+            </div> */}
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Confirm Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-base-content/40" />
+                </div>
+                <input
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
