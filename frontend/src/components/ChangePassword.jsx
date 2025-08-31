@@ -23,17 +23,18 @@ const ChangePassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.newPassword !== formData.confirmPassword) {
-      return;
-    }
+    // if (formData.newPassword !== formData.confirmPassword) {
+    //   return;
+    // }
 
-    if (formData.newPassword.length < 6) {
-      return;
-    }
+    // if (formData.newPassword.length < 6) {
+    //   return;
+    // }
 
     await changePassword({
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword,
+      confirmPassword: formData.confirmPassword,
     });
 
     setFormData({
