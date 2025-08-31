@@ -27,6 +27,7 @@ export const useChatStore = create((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
+      console.log(res.data);
       const decoded = res.data.map((msg) => ({
         ...msg,
         text: msg.encodedText
@@ -55,7 +56,6 @@ export const useChatStore = create((set, get) => ({
           huffmanTree: tree,
           text: undefined,
         };
-        console.log(payload);
       }
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,

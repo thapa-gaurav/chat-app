@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import BetterAES from "../lib/aes.js";
 
 export const getUsersForSideBar = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ export const getMessages = async (req, res) => {
     const { id: userToChatId } = req.params;
     const myId = req.user._id;
 
-    const messages = await Message.find({
+    const encryptedMessages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
         {
@@ -30,7 +31,38 @@ export const getMessages = async (req, res) => {
         },
       ],
     });
-    res.status(200).json(messages);
+    console.log("here");
+    const decryptedMessages = encryptedMessages.map((msg) => {
+      try {
+        // const decodedKey = BetterAES.base64ToString(msg.encryptionKey);
+        const decryptedKey = BetterAES.base64ToString(msg.encryptionKey);
+        const normalizedKey = BetterAES.normalizeKey(decryptedKey);
+        const decryptedText = BetterAES.decrypt(
+          msg.encryptedText,
+          normalizedKey
+        );
+        return {
+          _id: msg._id,
+          senderId: msg.senderId,
+          receiverId: msg.receiverId,
+          encodedText: decryptedText,
+          image: msg.image || null,
+          timestamp: msg.timestamp,
+          encrypted: true,
+        };
+      } catch (error) {
+        console.log("Error in getMessages controller: ", error.message);
+        return {
+          _id: msg._id,
+          senderId: msg.senderId,
+          receiverId: msg.receiverId,
+          // text: "[Decryption failed]",
+          timestamp: msg.timestamp,
+          decryptionError: true,
+        };
+      }
+    });
+    res.status(200).json(decryptedMessages);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -43,6 +75,11 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
+    const encryptionKey = BetterAES.generateKey();
+    const normalizedKey = BetterAES.normalizeKey(encryptionKey);
+    const encryptedText = BetterAES.encrypt(encodedText, normalizedKey);
+    const encryptionKeyBase64 = BetterAES.stringToBase64(normalizedKey);
+
     let imageUrl;
     if (image) {
       const uploadResponse = await cloudinary.uploader.upload(image);
@@ -51,8 +88,9 @@ export const sendMessage = async (req, res) => {
     const newMessage = new Message({
       senderId,
       receiverId,
-      encodedText,
+      encryptedText,
       huffmanTree,
+      encryptionKey: encryptionKeyBase64,
       image: imageUrl,
     });
 

@@ -12,11 +12,15 @@ const messageSchema = new Schema(
       ref: "User",
       required: true,
     },
-    encodedText: {
+    encryptedText: {
       type: String,
     },
     huffmanTree: {
       type: Object,
+    },
+    encryptionKey: {
+      type: String,
+      required: true,
     },
     text: {
       type: String,
