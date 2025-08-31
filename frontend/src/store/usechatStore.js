@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
+import { huffmanDecode, huffmanEncode } from "../lib/huffman";
 
 export const useChatStore = create((set, get) => ({
   messages: [],
@@ -26,7 +27,14 @@ export const useChatStore = create((set, get) => ({
     set({ isMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
-      set({ messages: res.data });
+      const decoded = res.data.map((msg) => ({
+        ...msg,
+        text: msg.encodedText
+          ? huffmanDecode(msg.encodedText, msg.huffmanTree)
+          : null,
+      }));
+      console.log(decoded);
+      set({ messages: decoded });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     } finally {
@@ -35,13 +43,30 @@ export const useChatStore = create((set, get) => ({
   },
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
-    console.log(messages);
+    // console.log(messages);
     try {
+      let payload = { ...messageData };
+      if (messageData.text) {
+        console.log(messageData.text);
+        const { encoded, tree } = huffmanEncode(messageData.text);
+        payload = {
+          ...messageData,
+          encodedText: encoded,
+          huffmanTree: tree,
+          text: undefined,
+        };
+        console.log(payload);
+      }
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData
+        payload
       );
-      set({ messages: [...messages, res.data] });
+
+      const decoded = res.data.encodedText
+        ? huffmanDecode(res.data.encodedText, res.data.huffmanTree)
+        : null;
+
+      set({ messages: [...messages, { ...res.data, text: decoded }] });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
@@ -55,8 +80,13 @@ export const useChatStore = create((set, get) => ({
 
     socket.on("newMessage", (newMessage) => {
       if (newMessage.senderId !== selectedUser._id) return;
+
+      const decoded = newMessage.encodedText
+        ? huffmanDecode(newMessage.encodedText, newMessage.huffmanTree)
+        : null;
+
       set({
-        messages: [...get().messages, newMessage],
+        messages: [...get().messages, { ...newMessage, text: decoded }],
       });
     });
   },

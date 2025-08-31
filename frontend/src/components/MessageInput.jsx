@@ -38,6 +38,8 @@ const MessageInput = () => {
         text: text.trim(),
         image: imagePreview,
       });
+      console.log(text.trim());
+
       setText("");
       setImagePreview(null);
       if (!fileInputRef.current) {

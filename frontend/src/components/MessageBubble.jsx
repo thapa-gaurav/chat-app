@@ -15,7 +15,6 @@ function MessageBubble({ message, authUser, selectedUser, messageEndRef }) {
       }`}
       ref={messageEndRef}
     >
-      {/* Avatar */}
       <div className="chat-image avatar">
         <div className="size-10 rounded-full border">
           <img
@@ -29,14 +28,12 @@ function MessageBubble({ message, authUser, selectedUser, messageEndRef }) {
         </div>
       </div>
 
-      {/* Time */}
       <div className="chat-header mb-1">
         <time className="text-xs opacity-50 ml-1">
           {formatMessagetime(message.createdAt)}
         </time>
       </div>
 
-      {/* Bubble */}
       <div className="chat-bubble relative flex flex-col">
         {message.image && (
           <img
@@ -46,7 +43,6 @@ function MessageBubble({ message, authUser, selectedUser, messageEndRef }) {
           />
         )}
 
-        {/* Text */}
         {message.text && (
           <p
             className={`transition duration-200 ${
@@ -58,7 +54,6 @@ function MessageBubble({ message, authUser, selectedUser, messageEndRef }) {
           </p>
         )}
 
-        {/* Unblur Button */}
         {isBlurred && (
           <button
             onClick={() => setIsBlurred(false)}

@@ -1,4 +1,3 @@
-import { text } from "express";
 import mongoose, { Schema } from "mongoose";
 
 const messageSchema = new Schema(
@@ -12,6 +11,12 @@ const messageSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    encodedText: {
+      type: String,
+    },
+    huffmanTree: {
+      type: Object,
     },
     text: {
       type: String,
