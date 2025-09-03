@@ -3,6 +3,7 @@ import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 import BetterAES from "../lib/aes.js";
+import BlockedUser from "../models/blockedUser.model.js";
 
 export const getUsersForSideBar = async (req, res) => {
   try {
@@ -74,6 +75,19 @@ export const sendMessage = async (req, res) => {
     const { encodedText, huffmanTree, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+
+    const isBlocked = await BlockedUser.findOne({
+      $or: [
+        { blockerId: senderId, blockedId: receiverId },
+        { blockerId: receiverId, blockedId: senderId },
+      ],
+    });
+
+    if (isBlocked) {
+      return res
+        .status(403)
+        .json({ message: "Messaging is blocked between these users." });
+    }
 
     const encryptionKey = BetterAES.generateKey();
     const normalizedKey = BetterAES.normalizeKey(encryptionKey);

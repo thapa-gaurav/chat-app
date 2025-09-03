@@ -16,10 +16,17 @@ const ChatContainer = () => {
     selectedUser,
     subscribeToMessages,
     unsubscribeFromMessages,
+    isBlocked,
   } = useChatStore();
-
+  // const [isBlocked, setIsBlocked] = useState(false);
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
+
+  // useEffect(() => {
+  //   if (selectedUser) {
+  //     checkBlockStatus(selectedUser._id).then(setIsBlocked);
+  //   }
+  // }, [selectedUser, checkBlockStatus]);
 
   useEffect(() => {
     getMessages(selectedUser._id);
@@ -61,7 +68,15 @@ const ChatContainer = () => {
           messageEndRef={messageEndRef}
         />
       ))}
-      <MessageInput />
+      <div>
+        {isBlocked ? (
+          <div className="p-4 text-center text-red-500">
+            You cannot send messages — this user is blocked.
+          </div>
+        ) : (
+          <MessageInput />
+        )}
+      </div>
     </div>
   );
   //  (

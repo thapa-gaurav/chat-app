@@ -11,6 +11,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  isBlocked: false,
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -69,6 +70,37 @@ export const useChatStore = create((set, get) => ({
       set({ messages: [...messages, { ...res.data, text: decoded }] });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
+    }
+  },
+  blockUser: async (userId) => {
+    // const { isBlocked } = get();
+    try {
+      await axiosInstance.post(`/users/block/${userId}`);
+      set({ isBlocked: true });
+      toast.success("User blocked");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  },
+
+  unblockUser: async (userId) => {
+    // const { checkBlockStatus } = get();
+    try {
+      await axiosInstance.post(`/users/unblock/${userId}`);
+      set({ isBlocked: false });
+      toast.success("User unblocked");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  },
+
+  checkBlockStatus: async (userId) => {
+    try {
+      const res = await axiosInstance.get(`/users/block-status/${userId}`);
+      set({ isBlocked: res.data.isBlocked });
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+      return false;
     }
   },
 
