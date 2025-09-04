@@ -20,7 +20,9 @@ const messageSchema = new Schema(
     },
     encryptionKey: {
       type: String,
-      required: true,
+    },
+    iv: {
+      type: String,
     },
     text: {
       type: String,

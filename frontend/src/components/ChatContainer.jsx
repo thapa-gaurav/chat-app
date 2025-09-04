@@ -17,6 +17,7 @@ const ChatContainer = () => {
     subscribeToMessages,
     unsubscribeFromMessages,
     isBlocked,
+    checkBlockStatus,
   } = useChatStore();
   // const [isBlocked, setIsBlocked] = useState(false);
   const { authUser } = useAuthStore();
@@ -30,7 +31,7 @@ const ChatContainer = () => {
 
   useEffect(() => {
     getMessages(selectedUser._id);
-
+    checkBlockStatus(selectedUser._id);
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
@@ -39,6 +40,7 @@ const ChatContainer = () => {
     getMessages,
     subscribeToMessages,
     unsubscribeFromMessages,
+    checkBlockStatus,
   ]);
 
   useEffect(() => {

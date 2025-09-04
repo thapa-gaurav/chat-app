@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
-import BetterAES from "../lib/aes.js";
+import { encryptAES, decryptAES } from "../lib/aesHelper.js";
 import BlockedUser from "../models/blockedUser.model.js";
 
 export const getUsersForSideBar = async (req, res) => {
@@ -22,7 +22,6 @@ export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
     const myId = req.user._id;
-
     const encryptedMessages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
@@ -32,23 +31,24 @@ export const getMessages = async (req, res) => {
         },
       ],
     });
-    console.log("here");
     const decryptedMessages = encryptedMessages.map((msg) => {
       try {
-        // const decodedKey = BetterAES.base64ToString(msg.encryptionKey);
-        const decryptedKey = BetterAES.base64ToString(msg.encryptionKey);
-        const normalizedKey = BetterAES.normalizeKey(decryptedKey);
-        const decryptedText = BetterAES.decrypt(
-          msg.encryptedText,
-          normalizedKey
-        );
+        let decryptedText;
+        if (msg.encryptedText && msg.encryptionKey && msg.iv) {
+          decryptedText = decryptAES(
+            msg.encryptedText,
+            msg.encryptionKey,
+            msg.iv
+          );
+        }
         return {
           _id: msg._id,
           senderId: msg.senderId,
           receiverId: msg.receiverId,
-          encodedText: decryptedText,
+          encodedText: decryptedText || null,
           image: msg.image || null,
-          timestamp: msg.timestamp,
+          huffmanTree: msg.huffmanTree,
+          createdAt: msg.createdAt,
           encrypted: true,
         };
       } catch (error) {
@@ -58,7 +58,7 @@ export const getMessages = async (req, res) => {
           senderId: msg.senderId,
           receiverId: msg.receiverId,
           // text: "[Decryption failed]",
-          timestamp: msg.timestamp,
+          createdAt: msg.createdAt,
           decryptionError: true,
         };
       }
@@ -89,30 +89,50 @@ export const sendMessage = async (req, res) => {
         .json({ message: "Messaging is blocked between these users." });
     }
 
-    const encryptionKey = BetterAES.generateKey();
-    const normalizedKey = BetterAES.normalizeKey(encryptionKey);
-    const encryptedText = BetterAES.encrypt(encodedText, normalizedKey);
-    const encryptionKeyBase64 = BetterAES.stringToBase64(normalizedKey);
+    let encrypted, AES_KEY, IV;
 
+    if (encodedText) {
+      const encryptionResult = encryptAES(encodedText);
+      encrypted = encryptionResult.encrypted;
+      AES_KEY = encryptionResult.AES_KEY;
+      IV = encryptionResult.IV;
+    }
     let imageUrl;
     if (image) {
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
     }
+
     const newMessage = new Message({
       senderId,
       receiverId,
-      encryptedText,
+      encryptedText: encrypted,
       huffmanTree,
-      encryptionKey: encryptionKeyBase64,
+      encryptionKey: AES_KEY,
+      iv: IV,
       image: imageUrl,
     });
 
     await newMessage.save();
 
+    // const receiverSocketId = getReceiverSocketId(receiverId);
+    // if (receiverSocketId) {
+    //   io.to(receiverSocketId).emit("newMessage", newMessage);
+    // }
+
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+      let outgoingMessage;
+      outgoingMessage = {
+        _id: newMessage._id,
+        senderId: newMessage.senderId,
+        receiverId: newMessage.receiverId,
+        encodedText: encodedText || null,
+        image: newMessage.image,
+        huffmanTree: newMessage.huffmanTree,
+        createdAt: newMessage.createdAt,
+      };
+      io.to(receiverSocketId).emit("newMessage", outgoingMessage);
     }
 
     res.status(201).json(newMessage);

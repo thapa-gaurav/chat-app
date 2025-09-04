@@ -49,7 +49,6 @@ export const useChatStore = create((set, get) => ({
     try {
       let payload = { ...messageData };
       if (messageData.text) {
-        console.log(messageData.text);
         const { encoded, tree } = huffmanEncode(messageData.text);
         payload = {
           ...messageData,
@@ -63,11 +62,11 @@ export const useChatStore = create((set, get) => ({
         payload
       );
 
-      const decoded = res.data.encodedText
-        ? huffmanDecode(res.data.encodedText, res.data.huffmanTree)
-        : null;
+      // const decoded = res.data.encodedText
+      //   ? huffmanDecode(res.data.encodedText, res.data.huffmanTree)
+      //   : null;
 
-      set({ messages: [...messages, { ...res.data, text: decoded }] });
+      set({ messages: [...messages, { ...res.data, text: messageData.text }] });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
