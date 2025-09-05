@@ -108,17 +108,22 @@ export const useChatStore = create((set, get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    const myId = useAuthStore.getState().authUser?._id;
 
     socket.on("newMessage", (newMessage) => {
-      if (newMessage.senderId !== selectedUser._id) return;
-
       const decoded = newMessage.encodedText
         ? huffmanDecode(newMessage.encodedText, newMessage.huffmanTree)
         : null;
 
-      set({
-        messages: [...get().messages, { ...newMessage, text: decoded }],
-      });
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
+        set({
+          messages: [...get().messages, { ...newMessage, text: decoded }],
+        });
+      } else if (newMessage.senderId !== myId) {
+        toast.success(`📩 New message from ${newMessage.senderName}`, {
+          position: "top-right",
+        });
+      }
     });
   },
 

@@ -119,7 +119,7 @@ export const sendMessage = async (req, res) => {
     // if (receiverSocketId) {
     //   io.to(receiverSocketId).emit("newMessage", newMessage);
     // }
-
+    const sender = await User.findById(senderId).select("fullName");
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       let outgoingMessage;
@@ -131,6 +131,7 @@ export const sendMessage = async (req, res) => {
         image: newMessage.image,
         huffmanTree: newMessage.huffmanTree,
         createdAt: newMessage.createdAt,
+        senderName: sender?.fullName || "UnKnown",
       };
       io.to(receiverSocketId).emit("newMessage", outgoingMessage);
     }
